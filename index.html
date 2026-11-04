@@ -367,56 +367,30 @@ footer .cp{padding-top:20px;text-align:center;font-size:13px}
 <div class="toast" id="toast"></div>
 
 <script>
-/* ====== SETTINGS — edit these ====== */
-const WHATSAPP = "97126352515";      // store WhatsApp number, digits only with country code
+/* ====== SETTINGS — defaults; real values come from data.json (edit them in /admin/) ====== */
+let WHATSAPP = "97126352515";        // store WhatsApp number, digits only with country code
 const PHONE_DISPLAY = "+971 2 635 2515";
-const FREE_DELIVERY_MIN = 200;        // free delivery above this (AED)
-const DELIVERY_FEE = 15;              // delivery fee otherwise (AED)
+let FREE_DELIVERY_MIN = 200;          // free delivery above this (AED)
+let DELIVERY_FEE = 15;                // delivery fee otherwise (AED)
 
-/* ====== PRODUCTS (prices are sample — update to real prices) ====== */
-const P = [
- {id:1,c:"Nuts & Dried Fruits",n:"California Walnuts",d:"Light halves, fresh & crunchy",u:"500g",p:32,e:"🌰",bg:"#f3e3c3",t:"Best Seller"},
- {id:2,c:"Nuts & Dried Fruits",n:"Iranian Pistachios",d:"Roasted & salted, jumbo size",u:"500g",p:55,e:"🥜",bg:"#dfe9c8",t:"Premium"},
- {id:3,c:"Nuts & Dried Fruits",n:"Raw Almonds",d:"Whole, skin-on, naturally sweet",u:"500g",p:30,e:"🌰",bg:"#efdcc0"},
- {id:4,c:"Nuts & Dried Fruits",n:"Golden Raisins",d:"Seedless, soft & juicy",u:"500g",p:16,e:"🍇",bg:"#f1e3b0"},
- {id:5,c:"Nuts & Dried Fruits",n:"Black Raisins",d:"Sun-dried, rich flavour",u:"500g",p:14,e:"🍇",bg:"#e3d6e6"},
- {id:6,c:"Rice",b:"Gautam",n:"Gautam Basmati Rice",d:"Extra-long aged grain, fluffy biryani",u:"5kg",p:49,e:"🍚",bg:"#f4efe0",t:"Best Seller"},
- {id:7,c:"Rice",b:"Sinnara",n:"Sinnara Basmati Rice",d:"Long grain, aromatic, everyday favourite",u:"5kg",p:45,e:"🍚",bg:"#f3ead2"},
- {id:8,c:"Rice",b:"Sinnara",n:"Sinnara Sella Rice",d:"Parboiled, never sticky",u:"5kg",p:32,e:"🍚",bg:"#f4efe0"},
- {id:9,c:"Spices & Saffron",n:"Pure Saffron",d:"Deep red threads, strong aroma",u:"5g",p:38,e:"🌸",bg:"#f6d9d0",t:"Premium"},
- {id:10,c:"Spices & Saffron",n:"Cardamom (Green)",d:"Fragrant pods for tea & sweets",u:"100g",p:22,e:"🌿",bg:"#d9e8cf"},
- {id:11,c:"Spices & Saffron",n:"Turmeric Powder",d:"Bright golden colour",u:"200g",p:8,e:"🧂",bg:"#f5e2a8"},
- {id:12,c:"Pulses & Beans",n:"Chickpeas",d:"Large kabuli, for hummus & curries",u:"1kg",p:9,e:"🫘",bg:"#f1e3c5"},
- {id:13,c:"Pulses & Beans",n:"Red Kidney Beans",d:"Hearty and protein-rich",u:"1kg",p:10,e:"🫘",bg:"#efcfc6"},
- {id:14,c:"Pulses & Beans",n:"Red Lentils",d:"Quick-cooking, great for soup",u:"1kg",p:8,e:"🫘",bg:"#f2d6b8"},
- {id:15,c:"Tea & Sugar",b:"Lipton",n:"Lipton Yellow Label Tea",d:"Strong, bold, rich colour",u:"900g",p:28,e:"🍵",bg:"#e2d2bd",t:"Best Seller"},
- {id:16,c:"Tea & Sugar",b:"Lipton",n:"Lipton Green Tea",d:"Light and refreshing",u:"100 bags",p:15,e:"🍵",bg:"#d9e8cf"},
- {id:17,c:"Tea & Sugar",n:"White Sugar",d:"Fine refined sugar",u:"5kg",p:19,e:"🧂",bg:"#eef0f2"},
- {id:18,c:"Tea & Sugar",n:"Brown Sugar",d:"Soft & naturally molasses-rich",u:"1kg",p:7,e:"🧂",bg:"#ecd9bd"},
- {id:19,c:"Herbs",n:"Dried Mint",d:"Aromatic, for tea & cooking",u:"100g",p:6,e:"🌿",bg:"#d4e6cb"},
- {id:20,c:"Herbs",n:"Dried Thyme (Zaatar herb)",d:"Wild-grown, fragrant",u:"200g",p:12,e:"🌿",bg:"#d9e6cf"},
- {id:21,c:"Oils",b:"Al Afiya",n:"Al Afiya Sunflower Oil",d:"Light, ideal for frying",u:"5L",p:36,e:"🛢️",bg:"#f7e9a6"},
- {id:22,c:"Oils",b:"Al Afiya",n:"Al Afiya Corn Oil",d:"Clear golden, all-purpose",u:"1.8L",p:19,e:"🛢️",bg:"#f4e6a0"},
- {id:23,c:"Oils",n:"Extra Virgin Olive Oil",d:"Cold pressed, fruity & peppery",u:"1L",p:42,e:"🫒",bg:"#dfe5c2",t:"Premium"},
- {id:24,c:"Oils",n:"Pure Olive Oil",d:"Mild flavour for daily cooking",u:"1L",p:30,e:"🫒",bg:"#e4e8cc"}
-];
-const cats = ["All", ...new Set(P.map(x=>x.c))];
+/* ====== PRODUCTS — loaded from data.json (edit them in /admin/) ====== */
+let P = [], cats = ["All"];
 let active = "All", cart = {};
 try{ cart = JSON.parse(localStorage.getItem("yf_cart")||"{}") }catch(e){}
 
 
 /* ====== ARABIC (UAE) LANGUAGE ====== */
-const AR_P = {"1": ["جوز كاليفورنيا", "أنصاف فاتحة اللون، طازجة ومقرمشة"], "2": ["فستق إيراني", "محمص ومملح، حجم كبير"], "3": ["لوز نيء", "حبات كاملة بقشرتها، حلو بطبيعته"], "4": ["زبيب ذهبي", "بدون بذور، طري وغني بالعصارة"], "5": ["زبيب أسود", "مجفف تحت الشمس، نكهة غنية"], "6": ["أرز بسمتي جواتم", "حبة طويلة جدًا ومعتّقة، مثالي للبرياني"], "7": ["أرز بسمتي سنارة", "حبة طويلة وعطرية، المفضل يوميًا"], "8": ["أرز سيلا سنارة", "مسلوق جزئيًا، لا يلتصق أبدًا"], "9": ["زعفران أصلي", "شعيرات حمراء داكنة، رائحة قوية"], "10": ["هيل أخضر", "حبات عطرية للشاي والحلويات"], "11": ["كركم مطحون", "لون ذهبي زاهٍ"], "12": ["حمص", "حبة كابلي كبيرة، للحمص والكاري"], "13": ["فاصوليا حمراء", "مشبعة وغنية بالبروتين"], "14": ["عدس أحمر", "سريع الطهي، رائع للشوربة"], "15": ["شاي ليبتون العلامة الصفراء", "قوي، بنكهة جريئة ولون غني"], "16": ["شاي ليبتون الأخضر", "خفيف ومنعش"], "17": ["سكر أبيض", "سكر مكرر ناعم"], "18": ["سكر بني", "طري وغني بالدبس طبيعيًا"], "19": ["نعناع مجفف", "عطري، للشاي والطبخ"], "20": ["زعتر مجفف", "بري وعطري"], "21": ["زيت دوار الشمس العافية", "خفيف، مثالي للقلي"], "22": ["زيت الذرة العافية", "ذهبي صافٍ، لجميع الاستخدامات"], "23": ["زيت زيتون بكر ممتاز", "معصور على البارد، بنكهة فاكهية ولاذعة قليلًا"], "24": ["زيت زيتون نقي", "نكهة خفيفة للطبخ اليومي"]};
-const AR_CAT = {"All":"الكل","Nuts & Dried Fruits":"المكسرات والفواكه المجففة","Rice":"الأرز","Spices & Saffron":"البهارات والزعفران","Pulses & Beans":"البقوليات","Tea & Sugar":"الشاي والسكر","Herbs":"الأعشاب","Oils":"الزيوت"};
+const AR_CAT = {"All":"الكل"};
 const AR_TAG = {"Best Seller":"الأكثر مبيعًا","Premium":"فاخر"};
 const TITLE = {en: document.title, ar: "يونس لتجارة المواد الغذائية ذ.م.م. — الحصن، أبوظبي · منذ 1980"};
 let LANG = "en";
 const isAr = () => LANG === "ar";
 const tr = (en, ar) => isAr() ? ar : en;
-const pName = p => isAr() ? AR_P[p.id][0] : p.n;
-const pDesc = p => isAr() ? AR_P[p.id][1] : p.d;
-const pUnit = p => isAr() ? p.u.replace(/kg$/," كغ").replace(/g$/," غ").replace(/L$/," لتر").replace(/ bags$/," كيس") : p.u;
-const catName = c => isAr() ? (AR_CAT[c]||c) : c;
+const pName = p => esc(isAr() && p.an ? p.an : p.n);
+const pDesc = p => esc(isAr() && p.ad ? p.ad : p.d);
+const pUnit = p => esc(isAr() ? String(p.u).replace(/kg$/," كغ").replace(/g$/," غ").replace(/L$/," لتر").replace(/ bags$/," كيس") : p.u);
+const catName = c => esc(isAr() ? (AR_CAT[c]||c) : c);
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch]);
 function setLang(l){
   LANG = l === "ar" ? "ar" : "en";
   document.documentElement.lang = isAr() ? "ar-AE" : "en";
@@ -444,9 +418,9 @@ function renderFilters(){
 }
 function setCat(c){ active=c; renderFilters(); renderGrid() }
 function renderGrid(){
-  $("grid").innerHTML = P.filter(x=>active==="All"||x.c===active).map(x=>`
+  $("grid").innerHTML = P.filter(x=>!x.hidden&&(active==="All"||x.c===active)).map(x=>`
    <div class="card">
-     <div class="thumb" style="background:${x.bg}">${x.t?`<em>${tr(x.t,AR_TAG[x.t])}</em>`:""}<span class="emo">${x.e}</span><img class="ph" loading="lazy" src="images/${x.id}.jpg" alt="${pName(x)}" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></div>
+     <div class="thumb" style="background:${esc(x.bg||"#f1e8d4")}">${x.t?`<em>${esc(tr(x.t,AR_TAG[x.t]||x.t))}</em>`:""}<span class="emo">${esc(x.e||"🛍️")}</span>${x.img?`<img class="ph" loading="lazy" src="${esc(x.img)}" alt="${pName(x)}" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()">`:""}</div>
      <div class="card-body">
        <h4>${pName(x)}</h4><p>${pDesc(x)}</p>
        <div class="buy"><div class="price"><b>${aed(x.p)}</b><small>${tr("per","لكل")} ${pUnit(x)}</small></div>
@@ -466,7 +440,7 @@ function renderCart(){
   const ids = Object.keys(cart);
   $("count").textContent = Object.values(cart).reduce((a,b)=>a+b,0);
   $("cartBody").innerHTML = ids.length ? ids.map(id=>{const p=P.find(x=>x.id==id),q=cart[id];return `
-    <div class="item"><div class="em">${p.e}</div>
+    <div class="item"><div class="em">${esc(p.e||"🛍️")}</div>
       <div><b>${pName(p)}</b><small>${pUnit(p)} · ${aed(p.p)}</small>
         <div class="qty"><button onclick="chg(${id},-1)">−</button><span>${q}</span><button onclick="chg(${id},1)">+</button></div></div>
       <div style="text-align:end"><b>${aed(p.p*q)}</b><br><button class="rm" onclick="rm(${id})">${tr("Remove","إزالة")}</button></div></div>`}).join("")
@@ -496,15 +470,36 @@ function sendEnquiry(e){
   wa(`*Enquiry – Younus Foodstuff*\nName: ${$("eN").value}\nPhone: ${$("eP").value}\n\n${$("eM").value}`);
 }
 document.querySelectorAll("#menu a").forEach(a=>a.onclick=()=>$("menu").classList.remove("on"));
-$("freeMin").textContent = FREE_DELIVERY_MIN;
+function applySettings(){
+  $("freeMin").textContent = FREE_DELIVERY_MIN;
+  $("waFloat").href = `https://wa.me/${WHATSAPP}`;
+}
+async function loadData(){
+  try{
+    const r = await fetch("data.json", {cache:"no-cache"});
+    if(!r.ok) throw new Error(r.status);
+    const d = await r.json(), s = d.settings || {}, cl = d.categories || [];
+    P = Array.isArray(d.products) ? d.products : [];
+    if(s.whatsapp) WHATSAPP = String(s.whatsapp).replace(/\D/g,"");
+    if(s.freeDeliveryMin != null && s.freeDeliveryMin !== "") FREE_DELIVERY_MIN = +s.freeDeliveryMin;
+    if(s.deliveryFee != null && s.deliveryFee !== "") DELIVERY_FEE = +s.deliveryFee;
+    cl.forEach(c => { if(c.ar) AR_CAT[c.en] = c.ar });
+    const shown = P.filter(p=>!p.hidden).map(p=>p.c);
+    cats = ["All", ...new Set([...cl.map(c=>c.en), ...shown].filter(c=>shown.includes(c)))];
+  }catch(e){
+    $("grid").innerHTML = `<p class="note">${tr("Products could not be loaded. Please refresh the page.","تعذّر تحميل المنتجات. يرجى تحديث الصفحة.")}</p>`;
+  }
+  Object.keys(cart).forEach(id => { if(!P.some(p=>p.id==id && !p.hidden)) delete cart[id] });
+  save();
+}
 $("phoneShow").textContent = PHONE_DISPLAY;
-$("waFloat").href = `https://wa.me/${WHATSAPP}`;
 $("yr").textContent = new Date().getFullYear();
-renderFilters(); renderGrid(); renderCart();
+applySettings();
 { let l = null;
   try{ l = new URLSearchParams(location.search).get("lang") || localStorage.getItem("yf_lang") }catch(e){}
   if(!l && (navigator.language||"").toLowerCase().startsWith("ar")) l = "ar";
   if(l === "ar") setLang("ar"); }
+loadData().then(()=>{ applySettings(); renderFilters(); if(P.length) renderGrid(); renderCart(); });
 </script>
 </body>
 </html>
