@@ -22,6 +22,13 @@ a{color:inherit;text-decoration:none}
 img{max-width:100%}
 .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
 section{padding:84px 0}
+/* UAE flag-colour ribbon */
+.has-ribbon{position:relative;overflow:hidden}
+.has-ribbon>.wrap{position:relative;z-index:1}
+.uae-ribbon{position:absolute;left:0;bottom:6px;width:100%;height:64px;overflow:hidden;pointer-events:none;filter:drop-shadow(0 6px 8px rgba(15,61,46,.18))}
+.uae-ribbon svg{display:block;width:200%;height:100%;animation:uaeRibbon 16s linear infinite}
+@keyframes uaeRibbon{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.uae-ribbon svg{animation:none}}
 .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
 .title{font-size:clamp(28px,4vw,44px);color:var(--green);margin-bottom:14px}
 .lead{color:var(--muted);max-width:640px;font-size:17px}
@@ -244,7 +251,7 @@ footer .cp{padding-top:20px;text-align:center;font-size:13px}
   <div><b>100%</b><span data-ar="جودة مختارة">QUALITY SELECTED</span></div>
 </div></div>
 
-<section id="about"><div class="wrap about">
+<section id="about" class="has-ribbon"><div class="uae-ribbon" aria-hidden="true"><svg viewBox="0 0 2880 64" preserveAspectRatio="none"><g fill="none" stroke-width="7.2"><path d="M0 21.5 C180 5.5 540 37.5 720 21.5 C900 5.5 1260 37.5 1440 21.5 C1620 5.5 1980 37.5 2160 21.5 C2340 5.5 2700 37.5 2880 21.5" stroke="#ef3340"/><path d="M0 28.5 C180 12.5 540 44.5 720 28.5 C900 12.5 1260 44.5 1440 28.5 C1620 12.5 1980 44.5 2160 28.5 C2340 12.5 2700 44.5 2880 28.5" stroke="#00843d"/><path d="M0 35.5 C180 19.5 540 51.5 720 35.5 C900 19.5 1260 51.5 1440 35.5 C1620 19.5 1980 51.5 2160 35.5 C2340 19.5 2700 51.5 2880 35.5" stroke="#ffffff"/><path d="M0 42.5 C180 26.5 540 58.5 720 42.5 C900 26.5 1260 58.5 1440 42.5 C1620 26.5 1980 58.5 2160 42.5 C2340 26.5 2700 58.5 2880 42.5" stroke="#111111"/></g></svg></div><div class="wrap about">
   <div class="about-art">
     <div class="big">1980</div>
     <h3 style="font-size:28px;margin:8px 0 14px" data-ar="أكثر من أربعة عقود في الحصن">Over four decades in Al Hisn</h3>
