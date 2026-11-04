@@ -1,7 +1,7 @@
 {
  "settings": {
   "whatsapp": "97126352515",
-  "deliveryFee": 15,
+  "deliveryFee": 32,
   "freeDeliveryMin": 200
  },
  "categories": [
@@ -113,7 +113,8 @@
    "e": "🍚",
    "bg": "#f4efe0",
    "t": "Best Seller",
-   "b": "Gautam"
+   "b": "Gautam",
+   "img": "images/6.jpg?v=1793792865810"
   },
   {
    "id": 7,
