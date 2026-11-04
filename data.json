@@ -2,8 +2,7 @@
  "settings": {
   "whatsapp": "97126352515",
   "deliveryFee": 32,
-  "freeDeliveryMin": 200,
-  "heroImg": "images/hero.jpg?v=1793793335418"
+  "freeDeliveryMin": 200
  },
  "categories": [
   {
@@ -128,7 +127,8 @@
    "p": 45,
    "e": "🍚",
    "bg": "#f3ead2",
-   "b": "Sinnara"
+   "b": "Sinnara",
+   "img": "images/7.jpg?v=1793794427758"
   },
   {
    "id": 8,
