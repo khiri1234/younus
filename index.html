@@ -300,7 +300,12 @@ footer .cp{padding-top:20px;text-align:center;font-size:13px}
 .checkout{display:none}.checkout.on{display:block}
 .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,120px);background:var(--green);color:#fff;padding:12px 22px;border-radius:999px;font-size:14px;z-index:200;transition:.35s}
 .toast.on{transform:translate(-50%,0)}
-.wa{position:fixed;bottom:22px;right:22px;z-index:60;width:58px;height:58px;border-radius:50%;background:#25d366;color:#fff;display:grid;place-items:center;font-size:28px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.wa{position:fixed;bottom:22px;right:22px;z-index:60;width:58px;height:58px;border-radius:50%;background:#25d366;color:#fff;display:grid;place-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .2s,box-shadow .2s}
+.wa:hover{transform:scale(1.07);box-shadow:0 10px 28px rgba(37,211,102,.45)}
+.wa:after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #25d366;animation:waPulse 2.6s ease-out infinite;pointer-events:none}
+@keyframes waPulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.55);opacity:0}}
+.wa-btn:before{content:"";width:18px;height:18px;flex:none;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M17.472%2014.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94%201.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198%200-.52.074-.792.372-.272.297-1.04%201.016-1.04%202.479%200%201.462%201.065%202.875%201.213%203.074.149.198%202.096%203.2%205.077%204.487.709.306%201.262.489%201.694.625.712.227%201.36.195%201.871.118.571-.085%201.758-.719%202.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421%207.403h-.004a9.87%209.87%200%2001-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86%209.86%200%2001-1.51-5.26c.001-5.45%204.436-9.884%209.888-9.884%202.64%200%205.122%201.03%206.988%202.898a9.825%209.825%200%20012.893%206.994c-.003%205.45-4.437%209.884-9.885%209.884m8.413-18.297A11.815%2011.815%200%200012.05%200C5.495%200%20.16%205.335.157%2011.892c0%202.096.547%204.142%201.588%205.945L.057%2024l6.305-1.654a11.882%2011.882%200%20005.683%201.448h.005c6.554%200%2011.89-5.335%2011.893-11.893a11.821%2011.821%200%2000-3.48-8.413Z%22/%3E%3C/svg%3E") center/contain no-repeat}
+@media(prefers-reduced-motion:reduce){.wa:after{animation:none;display:none}}
 
 @media(max-width:900px){
   .hero .wrap,.about,.contact{grid-template-columns:1fr}
@@ -467,7 +472,7 @@ footer .cp{padding-top:20px;text-align:center;font-size:13px}
         <label><span data-ar="اسمك">Your name</span><input id="eN" required></label>
         <label><span data-ar="رقم الهاتف">Phone</span><input id="eP" required inputmode="tel"></label>
         <label><span data-ar="الرسالة">Message</span><textarea id="eM" rows="4" data-ar-ph="أخبرنا بما تحتاجه — المنتج، الكمية، طلب جملة…" placeholder="Tell us what you need — product, quantity, bulk order…" required></textarea></label>
-        <button class="btn btn-green" type="submit" data-ar="أرسل عبر واتساب">Send via WhatsApp</button>
+        <button class="btn btn-green wa-btn" type="submit" data-ar="أرسل عبر واتساب">Send via WhatsApp</button>
       </form>
     </div>
   </div>
@@ -481,7 +486,7 @@ footer .cp{padding-top:20px;text-align:center;font-size:13px}
   <div class="cp">© <span id="yr"></span> <span data-ar="يونس لتجارة المواد الغذائية ذ.م.م. جميع الحقوق محفوظة.">Younus Foodstuff Trading LLC. All rights reserved.</span></div>
 </div></footer>
 
-<a class="wa" id="waFloat" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+<a class="wa" id="waFloat" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true"><path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></a>
 
 <div class="overlay" id="ov" onclick="closeCart()"></div>
 <aside class="drawer" id="drawer">
@@ -497,7 +502,7 @@ footer .cp{padding-top:20px;text-align:center;font-size:13px}
         <input id="cP" data-ar-ph="رقم الهاتف" placeholder="Phone number" required inputmode="tel">
         <select id="cE" required><option value="" data-ar="الإمارة">Emirate</option><option data-ar="أبوظبي">Abu Dhabi</option><option data-ar="دبي">Dubai</option><option data-ar="الشارقة">Sharjah</option><option data-ar="عجمان">Ajman</option><option data-ar="أم القيوين">Umm Al Quwain</option><option data-ar="رأس الخيمة">Ras Al Khaimah</option><option data-ar="الفجيرة">Fujairah</option></select>
         <textarea id="cA" rows="2" data-ar-ph="عنوان التوصيل الكامل / المنطقة / المبنى" placeholder="Full delivery address / area / building" required></textarea>
-        <button class="btn btn-gold" type="submit" data-ar="أرسل الطلب عبر واتساب">Send Order via WhatsApp</button>
+        <button class="btn btn-gold wa-btn" type="submit" data-ar="أرسل الطلب عبر واتساب">Send Order via WhatsApp</button>
       </form>
     </div>
     <button class="btn btn-green" id="toCheckout" onclick="document.getElementById('checkout').classList.add('on');this.style.display='none'" data-ar="إتمام الطلب ←">Checkout →</button>
