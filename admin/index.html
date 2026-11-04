@@ -237,6 +237,9 @@ const dlg = $("dlg");
 const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
 const num = v => v === "" ? "" : Math.max(0, +v);
 let TOKEN = "", DATA = null, SHA = null, dirty = 0, editing = null;
+let ORIG = null;                 // the data as it was when loaded / last published
+let touched = new Set();         // settings changed in this session
+const clone = o => JSON.parse(JSON.stringify(o));
 let photos = {};          // id -> {b64, url} waiting to be uploaded
 let draftPhoto = null;    // photo chosen in the open editor: {b64,url} | "remove" | null
 let heroPhoto = null;     // new banner photo waiting to be uploaded: {b64,url}
@@ -283,7 +286,7 @@ async function start(){
   SHA = f.sha; DATA = JSON.parse(b64ToText(f.content));
   DATA.settings = DATA.settings || {}; DATA.categories = DATA.categories || []; DATA.products = DATA.products || [];
   $("loginView").hidden = true; $("appView").hidden = false; $("topRight").hidden = false;
-  photos = {}; heroPhoto = null; clearDirty(); renderAll();
+  photos = {}; heroPhoto = null; ORIG = clone(DATA); touched = new Set(); clearDirty(); renderAll();
 }
 (async()=>{
   let t=null; try{ t = localStorage.getItem("yf_admin_token") || sessionStorage.getItem("yf_admin_token") }catch(_){}
@@ -426,7 +429,7 @@ function renderSettings(){
   $("sWhatsapp").value = s.whatsapp||""; $("sFee").value = s.deliveryFee??""; $("sFree").value = s.freeDeliveryMin??"";
   renderHero();
 }
-function setSetting(k, v){ DATA.settings[k] = v; markDirty() }
+function setSetting(k, v){ DATA.settings[k] = v; touched.add(k); markDirty() }
 function renderHero(){
   const src = heroPhoto ? heroPhoto.url : (DATA.settings.heroImg ? "../" + DATA.settings.heroImg : "");
   $("heroPrev").classList.toggle("on", !!src);
@@ -445,8 +448,8 @@ function resizePhoto(file, max, done){
   img.onerror = () => { URL.revokeObjectURL(url); toast("That file isn't a photo this browser can open. Try a JPG or PNG.", true) };
   img.src = url;
 }
-function pickHero(input){ const f = input.files[0]; input.value = ""; if(!f) return; resizePhoto(f, 1920, ph => { heroPhoto = ph; markDirty(); renderHero() }) }
-function removeHero(){ heroPhoto = null; delete DATA.settings.heroImg; markDirty(); renderHero() }
+function pickHero(input){ const f = input.files[0]; input.value = ""; if(!f) return; resizePhoto(f, 1920, ph => { heroPhoto = ph; touched.add("heroImg"); markDirty(); renderHero() }) }
+function removeHero(){ heroPhoto = null; delete DATA.settings.heroImg; touched.add("heroImg"); markDirty(); renderHero() }
 
 /* ---------- publish ---------- */
 async function publish(){
@@ -455,8 +458,17 @@ async function publish(){
   try{
     const latest = await gh(`/contents/${DATA_PATH}?ref=${BRANCH}`);
     if(latest.sha !== SHA){
-      if(!confirm("The website's products were changed somewhere else since you opened this page. Publish anyway and replace those changes with yours?")){ $("busy").classList.remove("on"); $("publishBtn").disabled=false; return }
-      SHA = latest.sha;
+      // The site was changed elsewhere since this page loaded: keep those changes and apply only ours on top.
+      const remote = JSON.parse(b64ToText(latest.content));
+      const same = (a, b) => JSON.stringify(a||[]) === JSON.stringify(b||[]);
+      if((!same(remote.products, ORIG.products) || !same(remote.categories, ORIG.categories)) &&
+         !confirm("The product list was also changed on another device or tab since you opened this page.\n\nOK = publish your product list (replaces those other product changes).\nCancel = stop, so you can reload and redo your changes.")){
+        $("busy").classList.remove("on"); $("publishBtn").disabled = false; return;
+      }
+      const merged = {...(remote.settings||{})};
+      touched.forEach(k => { if(k in DATA.settings) merged[k] = DATA.settings[k]; else delete merged[k] });
+      Object.keys(remote).forEach(k => { if(!["settings","products","categories"].includes(k)) DATA[k] = remote[k] });
+      DATA.settings = merged; SHA = latest.sha; renderSettings();
     }
     const ids = Object.keys(photos);
     for(let k=0; k<ids.length; k++){
@@ -475,7 +487,7 @@ async function publish(){
     }
     $("busy").textContent = "Publishing…";
     const res = await gh(`/contents/${DATA_PATH}`, {method:"PUT", body:JSON.stringify({message:"Admin: update products and settings", content:textToB64(JSON.stringify(DATA,null,1)+"\n"), sha:SHA, branch:BRANCH})});
-    SHA = res.content.sha; clearDirty(); renderProducts();
+    SHA = res.content.sha; ORIG = clone(DATA); touched = new Set(); clearDirty(); renderProducts();
     toast("Published ✓ — the website updates in about a minute.");
   }catch(err){
     $("publishBtn").disabled = false;
