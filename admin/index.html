@@ -89,6 +89,10 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 .dlg-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#fff}
 .x{background:none;border:0;font-size:26px;cursor:pointer;color:var(--green);line-height:1}
 .photo{display:flex;gap:14px;align-items:center}
+.hero-prev{position:relative;aspect-ratio:16/7;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#0b2f23,#0f3d2e 55%,#13503b);display:grid;place-items:center;color:#c9d8cf;font-size:14px}
+.hero-prev img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero-prev.on:after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(8,32,24,.94) 0%,rgba(11,47,35,.86) 45%,rgba(15,61,46,.55) 100%)}
+.hero-prev b{position:relative;z-index:1;color:#fff;font-size:20px;justify-self:start;padding-left:20px}
 .photo .thumb{width:84px;height:84px;font-size:40px;flex:none}
 
 .toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,140px);background:var(--green);color:#fff;padding:12px 22px;border-radius:999px;font-size:14px;z-index:300;transition:.35s;max-width:calc(100% - 32px);text-align:center}
@@ -173,6 +177,15 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
         <label>Free delivery above (AED)<input id="sFree" type="number" min="0" step="1" oninput="setSetting('freeDeliveryMin',num(this.value))"></label>
       </div>
     </div>
+    <div class="card" style="max-width:620px;margin-top:16px">
+      <b style="color:var(--green);display:block;margin-bottom:4px">Banner photo</b>
+      <p class="hint" style="margin-bottom:12px">Shown behind the big heading at the top of the website, with a dark green tint so the text stays readable. Wide (landscape) photos work best — for example the shop front or a display of nuts and spices.</p>
+      <div class="hero-prev" id="heroPrev"><span>No banner photo</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <label class="btn btn-line btn-sm" style="display:inline-flex;cursor:pointer">📷 Choose banner photo<input type="file" accept="image/*" hidden onchange="pickHero(this)"></label>
+        <button type="button" class="btn btn-red btn-sm" id="heroRm" onclick="removeHero()">Remove banner photo</button>
+      </div>
+    </div>
   </section>
   <div style="height:60px"></div>
 </div>
@@ -226,6 +239,7 @@ const num = v => v === "" ? "" : Math.max(0, +v);
 let TOKEN = "", DATA = null, SHA = null, dirty = 0, editing = null;
 let photos = {};          // id -> {b64, url} waiting to be uploaded
 let draftPhoto = null;    // photo chosen in the open editor: {b64,url} | "remove" | null
+let heroPhoto = null;     // new banner photo waiting to be uploaded: {b64,url}
 
 $("repoName").textContent = `${OWNER}/${REPO}`;
 
@@ -269,7 +283,7 @@ async function start(){
   SHA = f.sha; DATA = JSON.parse(b64ToText(f.content));
   DATA.settings = DATA.settings || {}; DATA.categories = DATA.categories || []; DATA.products = DATA.products || [];
   $("loginView").hidden = true; $("appView").hidden = false; $("topRight").hidden = false;
-  photos = {}; clearDirty(); renderAll();
+  photos = {}; heroPhoto = null; clearDirty(); renderAll();
 }
 (async()=>{
   let t=null; try{ t = localStorage.getItem("yf_admin_token") || sessionStorage.getItem("yf_admin_token") }catch(_){}
@@ -348,17 +362,7 @@ function updateEditorThumb(){
 $("fE").oninput = $("fBg").oninput = updateEditorThumb;
 function pickPhoto(input){
   const f = input.files[0]; if(!f) return;
-  const img = new Image(), url = URL.createObjectURL(f);
-  img.onload = () => {
-    const max = 900, s = Math.min(1, max/Math.max(img.width, img.height));
-    const c = document.createElement("canvas"); c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
-    const g = c.getContext("2d"); g.fillStyle="#fff"; g.fillRect(0,0,c.width,c.height); g.drawImage(img,0,0,c.width,c.height);
-    const dataUrl = c.toDataURL("image/jpeg", .84);
-    draftPhoto = {url:dataUrl, b64:dataUrl.split(",")[1]};
-    URL.revokeObjectURL(url); updateEditorThumb();
-  };
-  img.onerror = () => { URL.revokeObjectURL(url); toast("That file isn't a photo this browser can open. Try a JPG or PNG.", true) };
-  img.src = url;
+  resizePhoto(f, 900, ph => { draftPhoto = ph; updateEditorThumb() });
 }
 function removePhoto(){ draftPhoto = "remove"; $("fPhoto").value=""; updateEditorThumb() }
 function saveProduct(e){
@@ -420,8 +424,29 @@ function deleteCategory(i){
 function renderSettings(){
   const s = DATA.settings;
   $("sWhatsapp").value = s.whatsapp||""; $("sFee").value = s.deliveryFee??""; $("sFree").value = s.freeDeliveryMin??"";
+  renderHero();
 }
 function setSetting(k, v){ DATA.settings[k] = v; markDirty() }
+function renderHero(){
+  const src = heroPhoto ? heroPhoto.url : (DATA.settings.heroImg ? "../" + DATA.settings.heroImg : "");
+  $("heroPrev").classList.toggle("on", !!src);
+  $("heroPrev").innerHTML = src ? `<img src="${esc(src)}" alt=""><b>Quality foodstuff</b>` : `<span>No banner photo</span>`;
+  $("heroRm").style.display = src ? "" : "none";
+}
+function resizePhoto(file, max, done){
+  const img = new Image(), url = URL.createObjectURL(file);
+  img.onload = () => {
+    const s = Math.min(1, max/Math.max(img.width, img.height));
+    const c = document.createElement("canvas"); c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+    const g = c.getContext("2d"); g.fillStyle="#fff"; g.fillRect(0,0,c.width,c.height); g.drawImage(img,0,0,c.width,c.height);
+    const dataUrl = c.toDataURL("image/jpeg", .84);
+    URL.revokeObjectURL(url); done({url:dataUrl, b64:dataUrl.split(",")[1]});
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); toast("That file isn't a photo this browser can open. Try a JPG or PNG.", true) };
+  img.src = url;
+}
+function pickHero(input){ const f = input.files[0]; input.value = ""; if(!f) return; resizePhoto(f, 1920, ph => { heroPhoto = ph; markDirty(); renderHero() }) }
+function removeHero(){ heroPhoto = null; delete DATA.settings.heroImg; markDirty(); renderHero() }
 
 /* ---------- publish ---------- */
 async function publish(){
@@ -441,6 +466,12 @@ async function publish(){
       await gh(`/contents/${path}`, {method:"PUT", body:JSON.stringify({message:`Admin: update photo for product ${id}`, content:photos[id].b64, branch:BRANCH, ...(ex?{sha:ex.sha}:{})})});
       const p = DATA.products.find(x=>x.id==id); if(p) p.img = `${path}?v=${Date.now()}`;
       delete photos[id];
+    }
+    if(heroPhoto){
+      $("busy").textContent = "Uploading banner photo…";
+      const path = "images/hero.jpg", ex = await gh(`/contents/${path}?ref=${BRANCH}`, {allow404:true});
+      await gh(`/contents/${path}`, {method:"PUT", body:JSON.stringify({message:"Admin: update banner photo", content:heroPhoto.b64, branch:BRANCH, ...(ex?{sha:ex.sha}:{})})});
+      DATA.settings.heroImg = `${path}?v=${Date.now()}`; heroPhoto = null;
     }
     $("busy").textContent = "Publishing…";
     const res = await gh(`/contents/${DATA_PATH}`, {method:"PUT", body:JSON.stringify({message:"Admin: update products and settings", content:textToB64(JSON.stringify(DATA,null,1)+"\n"), sha:SHA, branch:BRANCH})});
