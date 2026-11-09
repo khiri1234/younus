@@ -43,8 +43,8 @@
   {
    "id": 1,
    "c": "Nuts & Dried Fruits",
-   "n": "California Walnuts",
-   "an": "جوز كاليفورنيا",
+   "n": "American Walnuts",
+   "an": "جوز امريكي",
    "d": "Light halves, fresh & crunchy",
    "ad": "أنصاف فاتحة اللون، طازجة ومقرمشة",
    "u": "500g",
@@ -189,7 +189,8 @@
    "p": 38,
    "e": "🌸",
    "bg": "#f6d9d0",
-   "t": "Premium"
+   "t": "Premium",
+   "img": "images/9.jpg?v=1794240048075"
   },
   {
    "id": 10,
@@ -201,7 +202,8 @@
    "u": "100g",
    "p": 22,
    "e": "🌿",
-   "bg": "#d9e8cf"
+   "bg": "#d9e8cf",
+   "img": "images/10.jpg?v=1794240051441"
   },
   {
    "id": 11,
@@ -226,7 +228,8 @@
    "u": "1kg",
    "p": 9,
    "e": "🫘",
-   "bg": "#f1e3c5"
+   "bg": "#f1e3c5",
+   "img": "images/12.jpg?v=1794240053983"
   },
   {
    "id": 13,
@@ -238,7 +241,8 @@
    "u": "1kg",
    "p": 10,
    "e": "🫘",
-   "bg": "#efcfc6"
+   "bg": "#efcfc6",
+   "img": "images/13.jpg?v=1794240056872"
   },
   {
    "id": 14,
@@ -376,7 +380,8 @@
    "u": "1L",
    "p": 30,
    "e": "🫒",
-   "bg": "#e4e8cc"
+   "bg": "#e4e8cc",
+   "img": "images/24.jpg?v=1794240060493"
   }
  ]
 }
