@@ -1,8 +1,8 @@
 {
  "settings": {
   "whatsapp": "97126352515",
-  "deliveryFee": 32,
-  "freeDeliveryMin": 200,
+  "deliveryFee": 75,
+  "freeDeliveryMin": 500,
   "heroImg": "images/hero.jpg?v=1793795032020"
  },
  "categories": [
