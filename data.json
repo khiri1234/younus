@@ -85,8 +85,8 @@
   {
    "id": 3,
    "c": "Nuts & Dried Fruits",
-   "n": "Raw Almonds",
-   "an": "لوز نيء",
+   "n": "Raw American Almonds",
+   "an": "لوز امريكي نيء",
    "d": "Whole, skin-on, naturally sweet",
    "ad": "حبات كاملة بقشرتها، حلو بطبيعته",
    "u": "500g",
@@ -98,8 +98,8 @@
   {
    "id": 25,
    "c": "Nuts & Dried Fruits",
-   "n": "CASHEW NUT",
-   "an": "",
+   "n": "RAW CASHEW NUT",
+   "an": "كاجو ني",
    "d": "",
    "ad": "",
    "u": "1kg",
@@ -213,7 +213,8 @@
    "u": "200g",
    "p": 8,
    "e": "🧂",
-   "bg": "#f5e2a8"
+   "bg": "#f5e2a8",
+   "img": "images/11.jpg?v=1794239108993"
   },
   {
    "id": 12,
