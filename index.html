@@ -267,6 +267,13 @@ nav a.link:hover:after{width:100%}
 .g{background:var(--white);border:1px solid #eadfc6;border-radius:var(--r);padding:26px;transition:.3s}
 .g:hover{box-shadow:var(--shadow);transform:translateY(-4px)}
 .g .ic{font-size:36px;margin-bottom:10px}
+.g-photo{overflow:hidden}
+.g-img{display:block;width:calc(100% + 52px);max-width:none;height:120px;object-fit:cover;margin:-26px -26px 18px}
+.cat-banner{position:relative;height:clamp(110px,16vw,190px);border-radius:var(--r);overflow:hidden;margin:-8px 0 26px;background:var(--hb) center/cover}
+.cat-banner:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,35,82,.85),rgba(13,35,82,.15) 70%)}
+[dir=rtl] .cat-banner:after{background:linear-gradient(270deg,rgba(13,35,82,.85),rgba(13,35,82,.15) 70%)}
+.cat-banner b{position:absolute;z-index:1;inset-inline-start:28px;top:50%;transform:translateY(-50%);color:#fff;font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,34px)}
+[dir=rtl] .cat-banner b{font-family:'El Messiri','Tajawal',serif}
 .g h3{font-size:21px;color:var(--green);margin-bottom:8px}
 .g p{font-size:14.5px;color:var(--muted)}
 .g .tag{display:inline-block;margin-top:12px;font-size:12px;font-weight:600;color:var(--gold);letter-spacing:.04em}
@@ -463,6 +470,7 @@ footer .cp{padding-top:20px;text-align:center;font-size:13px}
     <p class="lead" data-ar="أضف المنتجات إلى سلتك وسنوصلها إلى أي مكان في الإمارات. الأسعار بالدرهم الإماراتي وتشمل ضريبة القيمة المضافة.">Add items to your cart and we'll deliver anywhere in the UAE. Prices in AED, VAT inclusive.</p>
   </div>
   <div class="filters" id="filters"></div>
+  <div id="catBanner"></div>
   <div class="grid" id="grid"></div>
   <p class="note" data-ar="تحتاج كمية أو درجة مختلفة أو منتجًا غير مدرج؟ تواصل معنا — نوفّر أيضًا طلبات الجملة والكميات الكبيرة.">Need a different quantity, grade or a product not listed? Contact us — we also supply wholesale &amp; bulk orders.</p>
 </div></section>
@@ -483,7 +491,7 @@ footer .cp{padding-top:20px;text-align:center;font-size:13px}
     <div class="g"><div class="ic">🫘</div><h3 data-ar="البقوليات">Beans &amp; Pulses</h3><p data-ar="حمص وعدس وفاصوليا حمراء وفول — أساسيات مشبعة وغنية بالبروتين للشوربات واليخنات والكاري.">Chickpeas, lentils, kidney and fava beans — hearty, protein-rich staples for soups, stews and curries.</p><span class="tag" data-ar="انقعها طوال الليل لتُطهى أسرع">Soak overnight to cook faster</span></div>
     <div class="g"><div class="ic">🍵</div><h3 data-ar="الشاي">Tea</h3><p data-ar="شاي أسود قوي وشاي أخضر وخلطات عطرية — قدّمه كما تحب، مع الهيل أو النعناع.">Strong black tea, green tea and aromatic blends — served the way you like it, with cardamom or mint.</p><span class="tag" data-ar="ليبتون · يُحفظ محكم الإغلاق">Lipton · Keep airtight</span></div>
     <div class="g"><div class="ic">🧂</div><h3 data-ar="السكر">Sugar</h3><p data-ar="سكر أبيض ناعم وسكر بني ومكعبات سكر للشاي والخَبز والطبخ اليومي.">Fine white sugar, brown and cube sugar for tea, baking and everyday cooking.</p><span class="tag" data-ar="عبوات تجزئة وأكياس جملة">Retail &amp; bulk sacks</span></div>
-    <div class="g"><div class="ic">🌿</div><h3 data-ar="الأعشاب والبهارات">Herbs &amp; Spices</h3><p data-ar="نعناع مجفف، زعتر، هيل، كمون، كركم والمزيد — لنكهة بيتية أصيلة.">Dried mint, thyme, cardamom, cumin, turmeric and more — for authentic home-style flavour.</p><span class="tag" data-ar="مخزون طازج باستمرار">Fresh stock regularly</span></div>
+    <div class="g g-photo"><img class="g-img" src="images/herbs-spices.jpg" alt="Herbs and spices" loading="lazy"><h3 data-ar="الأعشاب والبهارات">Herbs &amp; Spices</h3><p data-ar="نعناع مجفف، زعتر، هيل، كمون، كركم والمزيد — لنكهة بيتية أصيلة.">Dried mint, thyme, cardamom, cumin, turmeric and more — for authentic home-style flavour.</p><span class="tag" data-ar="مخزون طازج باستمرار">Fresh stock regularly</span></div>
     <div class="g"><div class="ic">🛢️</div><h3 data-ar="زيت الطبخ">Cooking Oil</h3><p data-ar="زيوت دوار الشمس والذرة والزيوت النباتية بطعم خفيف، مثالية للقلي والخَبز والطبخ اليومي.">Sunflower, corn and vegetable oils with a light taste, ideal for frying, baking and daily cooking.</p><span class="tag" data-ar="العافية · 1.5 لتر · 5 لتر · 18 لتر">Al Afiya · 1.5L · 5L · 18L</span></div>
     <div class="g"><div class="ic">🫒</div><h3 data-ar="زيت الزيتون">Olive Oil</h3><p data-ar="زيت زيتون بكر ممتاز معصور على البارد — بنكهة فاكهية ولاذعة قليلًا، مثالي للسلطات والمقبلات وتزيين الأطباق.">Extra virgin olive oil, cold pressed — fruity and peppery, perfect for salads, dips and finishing dishes.</p><span class="tag" data-ar="بكر ممتاز">Extra virgin</span></div>
   </div>
@@ -630,7 +638,13 @@ function renderFilters(){
   $("filters").innerHTML = cats.map(c=>`<button class="chip ${c===active?'on':''}" onclick="setCat('${c.replace(/'/g,"\\'")}')">${catName(c)}</button>`).join("");
 }
 function setCat(c){ active=c; renderFilters(); renderGrid() }
+const CAT_BANNERS = {"Herbs":"images/herbs-spices.jpg","Spices & Saffron":"images/herbs-spices.jpg"};
+function renderBanner(){
+  const img = CAT_BANNERS[active];
+  $("catBanner").innerHTML = img ? `<div class="cat-banner" style="--hb:url('${img}')"><b>${catName(active)}</b></div>` : "";
+}
 function renderGrid(){
+  if($("catBanner")) renderBanner();
   $("grid").innerHTML = P.filter(x=>!x.hidden&&(active==="All"||x.c===active)).map(x=>`
    <div class="card">
      <div class="thumb" style="background:${esc(x.bg||"#f1e8d4")}">${x.t?`<em>${esc(tr(x.t,AR_TAG[x.t]||x.t))}</em>`:""}<span class="emo">${esc(x.e||"🛍️")}</span>${x.img?`<img class="ph" loading="lazy" src="${esc(x.img)}" alt="${pName(x)}" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()">`:""}</div>
