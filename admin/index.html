@@ -96,6 +96,9 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 .dlg-body{padding:20px 22px}
 .dlg-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#fff}
 .x{background:none;border:0;font-size:26px;cursor:pointer;color:var(--green);line-height:1}
+.sizes-ed{display:grid;gap:8px;font-size:13px;color:var(--green)}
+.srow{display:grid;grid-template-columns:1fr 1fr 34px;gap:8px;align-items:center}
+.srow .icon{width:34px;height:34px}
 .photo{display:flex;gap:14px;align-items:center}
 .hero-prev{position:relative;aspect-ratio:16/7;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#0a1b3f,#0d2352 55%,#15306a);display:grid;place-items:center;color:#c8d1e3;font-size:14px}
 .hero-prev img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -246,8 +249,11 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
         <label>Short description (English)<input id="fD" maxlength="140"></label>
         <label>الوصف (عربي)<input id="fAD" class="ar" maxlength="140"></label>
         <label>Category<select id="fC" required></select></label>
-        <label>Size / unit <span class="hint">e.g. 500g, 5kg, 1L, 100 bags</span><input id="fU" required maxlength="20"></label>
-        <label>Price (AED)<input id="fP" type="number" min="0" step="0.25" required></label>
+        <div class="full sizes-ed">
+          <b>Sizes &amp; prices</b> <span class="hint">One row per size customers can choose (e.g. 250g, 500g, 1kg, 1L, 100 bags). The first row is shown first.</span>
+          <div id="fSizes"></div>
+          <button type="button" class="btn btn-line btn-sm" onclick="addSizeRow()">+ Add size</button>
+        </div>
         <label>Badge<select id="fT"><option value="">None</option><option>Best Seller</option><option>Premium</option></select></label>
         <label>Emoji <span class="hint">Shown when there's no photo</span><input id="fE" maxlength="8"></label>
         <label>Card colour<input id="fBg" type="color"></label>
@@ -433,7 +439,7 @@ function renderProducts(){
       ${thumbHTML(p)}
       <div class="info"><b>${esc(p.n)}${p.t?`<span class="tag">${esc(p.t)}</span>`:""}${p.hidden?`<span class="tag off">Hidden</span>`:""}</b>
         ${p.an?`<span class="ar">${esc(p.an)}</span>`:""}
-        <div class="meta">AED ${esc(p.p)} · ${esc(p.u)} · ${esc(p.c)}</div></div>
+        <div class="meta">${sizeSummary(p)} · ${esc(p.c)}</div></div>
       <div class="acts">
         ${filtered?"":`<button class="icon" title="Move up" onclick="move(${i},-1)" ${i===0?"disabled":""}>↑</button><button class="icon" title="Move down" onclick="move(${i},1)" ${i===DATA.products.length-1?"disabled":""}>↓</button>`}
         <button class="btn btn-line btn-sm" onclick="editProduct(${p.id})">Edit</button>
@@ -451,7 +457,8 @@ function editProduct(id){
   editing = id || null; draftPhoto = null;
   $("dlgTitle").textContent = id ? "Edit product" : "Add product";
   $("fN").value=p.n||""; $("fAN").value=p.an||""; $("fD").value=p.d||""; $("fAD").value=p.ad||"";
-  $("fC").value=p.c; $("fU").value=p.u||""; $("fP").value=p.p??""; $("fT").value=p.t||"";
+  $("fC").value=p.c; $("fT").value=p.t||"";
+  $("fSizes").innerHTML = ""; ((Array.isArray(p.v) && p.v.length) ? p.v : [{u:p.u||"", p:p.p??""}]).forEach(s => addSizeRow(s.u, s.p));
   $("fE").value=p.e||""; $("fBg").value=/^#[0-9a-f]{6}$/i.test(p.bg||"")?p.bg:"#f1e8d4"; $("fShow").checked=!p.hidden;
   $("fPhoto").value=""; updateEditorThumb(); dlg.showModal();
 }
@@ -473,16 +480,36 @@ function pickPhoto(input){
   const f = input.files[0]; if(!f) return;
   resizePhoto(f, 900, ph => { draftPhoto = ph; updateEditorThumb() });
 }
+function addSizeRow(u="", pr=""){
+  const r = document.createElement("div"); r.className = "srow";
+  r.innerHTML = `<input class="su" maxlength="20" placeholder="Size, e.g. 500g"><input class="sp" type="number" min="0" step="0.25" placeholder="Price (AED)"><button type="button" class="icon" title="Remove this size">✕</button>`;
+  r.querySelector(".su").value = u; r.querySelector(".sp").value = pr;
+  r.querySelector("button").onclick = () => { if(document.querySelectorAll("#fSizes .srow").length > 1) r.remove(); else { r.querySelector(".su").value=""; r.querySelector(".sp").value="" } };
+  $("fSizes").appendChild(r);
+}
+function sizeSummary(p){
+  const s = (Array.isArray(p.v) && p.v.length) ? p.v : [{u:p.u, p:p.p}];
+  if(s.length === 1) return `AED ${esc(s[0].p)} · ${esc(s[0].u)}`;
+  const ps = s.map(x => +x.p); return `AED ${Math.min(...ps)}–${Math.max(...ps)} · ${s.map(x => esc(x.u)).join(" / ")}`;
+}
 function removePhoto(){ draftPhoto = "remove"; $("fPhoto").value=""; updateEditorThumb() }
 function saveProduct(e){
   e.preventDefault();
-  const price = +$("fP").value;
-  if(!(price >= 0)){ toast("Enter a valid price.", true); return }
+  const rows = [...document.querySelectorAll("#fSizes .srow")].map(r => ({u:r.querySelector(".su").value.trim(), p:r.querySelector(".sp").value}));
+  const v = rows.filter(r => r.u || r.p !== "");
+  if(!v.length) return toast("Add at least one size with a price.", true);
+  for(const r of v){
+    if(!r.u) return toast("Every price needs a size (e.g. 500g).", true);
+    if(r.p === "" || !(+r.p >= 0)) return toast(`Enter a valid price for ${r.u}.`, true);
+    r.p = +r.p;
+  }
+  if(new Set(v.map(r => r.u.toLowerCase())).size !== v.length) return toast("Two rows have the same size.", true);
   let p;
   if(editing) p = DATA.products.find(x=>x.id===editing);
   else { p = {id: DATA.products.reduce((m,x)=>Math.max(m,+x.id||0),0) + 1}; DATA.products.push(p) }
   Object.assign(p, {c:$("fC").value, n:$("fN").value.trim(), an:$("fAN").value.trim(), d:$("fD").value.trim(), ad:$("fAD").value.trim(),
-    u:$("fU").value.trim(), p:price, e:$("fE").value.trim()||"🛍️", bg:$("fBg").value});
+    u:v[0].u, p:v[0].p, e:$("fE").value.trim()||"🛍️", bg:$("fBg").value});
+  if(v.length > 1) p.v = v; else delete p.v;
   if($("fT").value) p.t = $("fT").value; else delete p.t;
   if($("fShow").checked) delete p.hidden; else p.hidden = true;
   if(draftPhoto === "remove"){ delete photos[p.id]; delete p.img }
