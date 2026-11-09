@@ -33,6 +33,9 @@ header{background:rgba(7,18,42,.97);border-bottom:1px solid rgba(255,181,46,.25)
 #langBtn{font-family:'Tajawal','Inter',sans-serif}
 main{max-width:900px;margin:0 auto;padding:44px 18px 60px}
 .card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:40px clamp(20px,5vw,48px)}
+.card{position:relative;overflow:hidden}.card>*{position:relative;z-index:1}
+.card:before{content:"";position:absolute;right:-2%;bottom:3%;width:min(620px,80%);aspect-ratio:1071/425;transform:rotate(-8deg);background:url(../images/logo-watermark.png) center/contain no-repeat;opacity:.06;pointer-events:none}
+[dir=rtl] .card:before{right:auto;left:-2%;transform:rotate(8deg)}
 .eyebrow{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
 h1{font-family:'Playfair Display',serif;color:var(--green);font-size:clamp(30px,5vw,42px);line-height:1.2;margin:6px 0 4px}
 .date{color:var(--muted);font-size:14px;margin-bottom:22px}
