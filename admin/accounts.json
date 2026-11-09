@@ -8,6 +8,15 @@
    "iv": "l0LnbCF2TlhB/u77",
    "ct": "wF0fy4MverEPOIQGMBClSkvsJE9mIIYCKmp8KBMB7g6st4y2ZY6KhunFaDbDMZJfsw0+6kOIL8euSjDpk91Da6n7L7y7D+X4ut90kMyoGnnX3MDCEl5PDCHAycNABRQZc8vy2rik9uKhN84gbg==",
    "added": "2026-11-09"
+  },
+  {
+   "u": "staff",
+   "role": "staff",
+   "iter": 600000,
+   "salt": "h7I9pkBWA1wHVioV1fuXIA==",
+   "iv": "/lnZtc682rhBPUSX",
+   "ct": "NTFzXotiB8oueFgRlvIVeGaFkKunxZQ1EbmiGq5/w3EdMxcGIXRPLtiIQw/Tp5V2ifajj70E3ar+pNl8AcAx5WIPCndzY4DDLzMkpf0POKTLW6OzGkKHxfKGte2tBejFrfMzsRuUxA6Klz9XrQ==",
+   "added": "2026-11-09"
   }
  ]
 }
