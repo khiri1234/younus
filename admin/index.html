@@ -50,6 +50,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold)}
 input[type=color]{height:44px;padding:4px 6px;cursor:pointer}
 .check{display:flex;gap:8px;align-items:center;font-weight:500;color:var(--ink);font-size:14px}
 .check input{width:auto}
+[hidden]{display:none!important}
+.who{color:#e9e2cf;font-size:13px;opacity:.85;white-space:nowrap}
+.owner{margin-top:22px;border-top:1px solid var(--line);padding-top:14px}
+.owner summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--green)}
+.urow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.urow b{font-size:15px}.urow .tag{margin-left:8px}
 .err{color:var(--red);font-size:14px;margin-top:10px;min-height:20px}
 
 /* tabs */
@@ -120,6 +126,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
     <span class="pending" id="pending">0 unsaved</span>
     <button class="btn btn-gold" id="publishBtn" onclick="publish()" disabled>Publish changes</button>
     <a class="btn btn-ghost btn-sm" href="../" target="_blank" rel="noopener">View site ↗</a>
+    <span class="who" id="who"></span>
     <button class="btn btn-ghost btn-sm" onclick="logout()">Sign out</button>
   </div>
 </div></div>
@@ -128,22 +135,31 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 <div class="login" id="loginView">
   <div class="card">
     <h1>Sign in to edit the website</h1>
-    <p>Changes you publish here are saved to the website's GitHub repository and go live on the site in about a minute.</p>
-    <p style="margin-bottom:6px"><b>First time?</b> Create an access key on GitHub:</p>
-    <ol>
-      <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → New fine-grained token</a> (sign in as the repo owner).</li>
-      <li><b>Token name:</b> Younus admin. <b>Expiration:</b> choose how long it should work (e.g. 1 year).</li>
-      <li><b>Repository access:</b> Only select repositories → <b id="repoName"></b>.</li>
-      <li><b>Permissions → Repository permissions → Contents:</b> Read and write.</li>
-      <li>Click <b>Generate token</b>, copy it and paste it below.</li>
-    </ol>
-    <form onsubmit="login(event)" style="display:grid;gap:12px">
-      <label>Access key (token)<input id="tokenIn" type="password" autocomplete="off" placeholder="github_pat_…" required></label>
-      <label class="check"><input type="checkbox" id="remember" checked> Remember on this device</label>
-      <button class="btn btn-green" type="submit">Sign in</button>
-      <div class="err" id="loginErr"></div>
+    <p>Sign in with the username and password you were given.</p>
+    <form onsubmit="userLogin(event)" style="display:grid;gap:12px" autocomplete="on">
+      <label>Username<input id="uIn" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+      <label>Password<input id="pIn" type="password" autocomplete="current-password" required></label>
+      <label class="check"><input type="checkbox" id="rememberU" checked> Keep me signed in on this device</label>
+      <button class="btn btn-green" type="submit" id="uBtn">Sign in</button>
+      <div class="err" id="uErr"></div>
     </form>
-    <p class="hint" style="margin:6px 0 0">Keep this key private — anyone with it can change the website. Only sign in on your own devices.</p>
+    <details class="owner" id="ownerBox">
+      <summary>Owner: sign in with the GitHub key</summary>
+      <p class="hint" style="margin:10px 0 6px">Use this once to set up the admin panel, then create usernames and passwords in the <b>Users</b> tab. To create a key:</p>
+      <ol>
+        <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → New fine-grained token</a> (signed in as the repo owner).</li>
+        <li><b>Repository access:</b> Only select repositories → <b id="repoName"></b>.</li>
+        <li><b>Permissions:</b> add <b>Contents</b> → Read and write.</li>
+        <li>Click <b>Generate token</b>, copy it and paste it below.</li>
+      </ol>
+      <form onsubmit="login(event)" style="display:grid;gap:12px">
+        <label>Access key (token)<input id="tokenIn" type="password" autocomplete="off" placeholder="github_pat_…" required></label>
+        <label class="check"><input type="checkbox" id="remember" checked> Remember on this device</label>
+        <button class="btn btn-line" type="submit">Sign in with key</button>
+        <div class="err" id="loginErr"></div>
+      </form>
+    </details>
+    <p class="hint" style="margin:14px 0 0">Only sign in on devices you trust.</p>
   </div>
 </div>
 
@@ -151,8 +167,9 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 <div class="wrap" id="appView" hidden>
   <div class="tabs">
     <button class="tab on" data-tab="products">Products</button>
-    <button class="tab" data-tab="categories">Categories</button>
-    <button class="tab" data-tab="settings">Shop settings</button>
+    <button class="tab" data-tab="categories" data-admin>Categories</button>
+    <button class="tab" data-tab="settings" data-admin>Shop settings</button>
+    <button class="tab" data-tab="users" data-admin>Users</button>
   </div>
 
   <section class="panel on" id="tab-products">
@@ -168,6 +185,24 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
     <p class="hint" style="margin-bottom:14px">Categories are the filter buttons above the products on the website, shown in this order. A category only appears on the site when it has at least one visible product.</p>
     <div id="catList"></div>
     <button class="btn btn-green" onclick="addCategory()">+ Add category</button>
+  </section>
+
+  <section class="panel" id="tab-users">
+    <div class="card" style="max-width:720px">
+      <b style="color:var(--green);display:block;margin-bottom:4px">People who can sign in</b>
+      <p class="hint" style="margin-bottom:12px"><b>Admin</b>: everything, including shop settings, categories, deleting products and managing users. <b>Staff</b>: add and edit products, prices and photos, and hide items — but can't delete products or change settings, categories or users. Changes here are saved straight away; a new user can sign in about a minute later.</p>
+      <div id="userList" class="list"></div>
+    </div>
+    <div class="card" style="max-width:720px;margin-top:16px">
+      <b style="color:var(--green);display:block;margin-bottom:10px">Add a user</b>
+      <form onsubmit="addUser(event)" class="grid2" autocomplete="off">
+        <label>Username <span class="hint">lowercase letters, numbers, . _ -</span><input id="nuName" required pattern="[a-z0-9._\-]{3,30}" autocapitalize="none" spellcheck="false" placeholder="e.g. ahmed"></label>
+        <label>Role<select id="nuRole"><option value="staff">Staff</option><option value="admin">Admin</option></select></label>
+        <label>Password <span class="hint">at least 10 characters</span><input id="nuPass" type="password" minlength="10" required autocomplete="new-password"></label>
+        <label>Repeat password<input id="nuPass2" type="password" minlength="10" required autocomplete="new-password"></label>
+        <div class="full"><button class="btn btn-green" type="submit">+ Add user</button></div>
+      </form>
+    </div>
   </section>
 
   <section class="panel" id="tab-settings">
@@ -239,6 +274,9 @@ const dlg = $("dlg");
 const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
 const num = v => v === "" ? "" : Math.max(0, +v);
 let TOKEN = "", DATA = null, SHA = null, dirty = 0, editing = null;
+let ROLE = "owner", WHO = "";      // owner (GitHub key) | admin | staff
+const isAdmin = () => ROLE !== "staff";
+const ACCOUNTS_PATH = "admin/accounts.json";
 let ORIG = null;                 // the data as it was when loaded / last published
 let touched = new Set();         // settings changed in this session
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -263,6 +301,59 @@ async function gh(path, opts={}){
 const b64ToText = b => new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\s/g,"")), c=>c.charCodeAt(0)));
 function textToB64(t){ const bytes=new TextEncoder().encode(t); let s=""; for(let i=0;i<bytes.length;i+=0x8000) s+=String.fromCharCode.apply(null, bytes.subarray(i,i+0x8000)); return btoa(s) }
 
+/* ---------- password-protected keys ----------
+   Each user's copy of the GitHub key is encrypted (AES-256-GCM) with a key derived from
+   their password (PBKDF2-SHA256, 600,000 rounds). The username and role are bound to the
+   ciphertext, so editing them in accounts.json breaks decryption. */
+const b64e = buf => { const a=new Uint8Array(buf); let s=""; for(const x of a) s+=String.fromCharCode(x); return btoa(s) };
+const b64d = s => Uint8Array.from(atob(s), c=>c.charCodeAt(0));
+const aad = r => new TextEncoder().encode(`younus-admin|${r.u}|${r.role}`);
+async function deriveKey(pw, salt, iter){
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2", salt, iterations:iter, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]);
+}
+async function sealToken(u, role, pw){
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), iter = 600000;
+  const rec = {u, role, iter, salt:b64e(salt), iv:b64e(iv)};
+  const key = await deriveKey(pw, salt, iter);
+  rec.ct = b64e(await crypto.subtle.encrypt({name:"AES-GCM", iv, additionalData:aad(rec)}, key, new TextEncoder().encode(TOKEN)));
+  rec.added = new Date().toISOString().slice(0,10);
+  return rec;
+}
+async function openToken(rec, pw){
+  const key = await deriveKey(pw, b64d(rec.salt), rec.iter);
+  return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv:b64d(rec.iv), additionalData:aad(rec)}, key, b64d(rec.ct)));
+}
+function saveSession(remember){
+  try{
+    localStorage.removeItem("yf_admin_token"); sessionStorage.removeItem("yf_admin_token");
+    localStorage.removeItem("yf_admin_session"); sessionStorage.removeItem("yf_admin_session");
+    (remember ? localStorage : sessionStorage).setItem("yf_admin_session", JSON.stringify({t:TOKEN, r:ROLE, u:WHO}));
+  }catch(_){}
+}
+async function userLogin(e){
+  e.preventDefault();
+  const u = $("uIn").value.trim().toLowerCase(), pw = $("pIn").value;
+  $("uErr").textContent = "Checking…"; $("uBtn").disabled = true;
+  try{
+    let acc = null;
+    try{ const r = await fetch("accounts.json", {cache:"no-store"}); if(r.ok) acc = await r.json() }catch(_){}
+    const rec = acc && (acc.users||[]).find(x => x.u === u);
+    if(!rec) throw new Error("bad");
+    try{ TOKEN = await openToken(rec, pw) }catch(_){ throw new Error("bad") }
+    const repo = await gh("");
+    if(!repo.permissions || !repo.permissions.push) throw Object.assign(new Error("perm"), {status:403});
+    ROLE = rec.role === "admin" ? "admin" : "staff"; WHO = rec.u;
+    saveSession($("rememberU").checked);
+    $("pIn").value = "";
+    await start();
+  }catch(err){
+    TOKEN = "";
+    $("uErr").textContent = err.message === "bad" ? "Wrong username or password." :
+      (err.status === 401 || err.status === 403) ? "Your account is set up, but the website's GitHub key has expired or changed. Ask the owner to set up your account again." : err.message;
+  }finally{ $("uBtn").disabled = false }
+}
+
 /* ---------- sign in ---------- */
 async function login(e){
   e.preventDefault();
@@ -270,7 +361,8 @@ async function login(e){
   try{
     const repo = await gh("");
     if(!repo.permissions || !repo.permissions.push) throw new Error("This key can read the repository but can't save changes. Give it Contents: Read and write.");
-    try{ ($("remember").checked ? localStorage : sessionStorage).setItem("yf_admin_token", TOKEN) }catch(_){}
+    ROLE = "owner"; WHO = "Owner";
+    saveSession($("remember").checked);
     await start();
   }catch(err){
     TOKEN = "";
@@ -280,7 +372,7 @@ async function login(e){
 }
 function logout(){
   if(dirty && !confirm("You have unpublished changes. Sign out and lose them?")) return;
-  try{ localStorage.removeItem("yf_admin_token"); sessionStorage.removeItem("yf_admin_token") }catch(_){}
+  try{ ["yf_admin_token","yf_admin_session"].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k) }) }catch(_){}
   dirty = 0; location.reload();
 }
 async function start(){
@@ -288,12 +380,24 @@ async function start(){
   SHA = f.sha; DATA = JSON.parse(b64ToText(f.content));
   DATA.settings = DATA.settings || {}; DATA.categories = DATA.categories || []; DATA.products = DATA.products || [];
   $("loginView").hidden = true; $("appView").hidden = false; $("topRight").hidden = false;
-  photos = {}; heroPhoto = null; ORIG = clone(DATA); touched = new Set(); clearDirty(); renderAll();
+  photos = {}; heroPhoto = null; ORIG = clone(DATA); touched = new Set(); clearDirty(); renderAll(); applyRole();
+}
+function applyRole(){
+  $("who").textContent = ROLE === "owner" ? "Owner (GitHub key)" : `${WHO} · ${ROLE === "admin" ? "Admin" : "Staff"}`;
+  document.querySelectorAll("[data-admin]").forEach(el => el.hidden = !isAdmin());
+  if(!isAdmin()) document.querySelector('.tab[data-tab="products"]').click();
+  renderProducts();
+  if(isAdmin()) loadUsers();
 }
 (async()=>{
-  let t=null; try{ t = localStorage.getItem("yf_admin_token") || sessionStorage.getItem("yf_admin_token") }catch(_){}
-  if(!t) return;
-  TOKEN = t;
+  let t=null, s=null;
+  try{
+    s = JSON.parse(localStorage.getItem("yf_admin_session") || sessionStorage.getItem("yf_admin_session") || "null");
+    t = localStorage.getItem("yf_admin_token") || sessionStorage.getItem("yf_admin_token");
+  }catch(_){}
+  if(s && s.t){ TOKEN = s.t; ROLE = s.r || "staff"; WHO = s.u || "" }
+  else if(t){ TOKEN = t; ROLE = "owner"; WHO = "Owner" }
+  else return;
   try{ await start() }catch(err){ TOKEN=""; $("loginErr").textContent = err.status===401 ? "Your saved key has expired. Please sign in again." : err.message }
 })();
 
@@ -333,7 +437,7 @@ function renderProducts(){
       <div class="acts">
         ${filtered?"":`<button class="icon" title="Move up" onclick="move(${i},-1)" ${i===0?"disabled":""}>↑</button><button class="icon" title="Move down" onclick="move(${i},1)" ${i===DATA.products.length-1?"disabled":""}>↓</button>`}
         <button class="btn btn-line btn-sm" onclick="editProduct(${p.id})">Edit</button>
-        <button class="btn btn-red btn-sm" onclick="deleteProduct(${p.id})">Delete</button>
+        ${isAdmin() ? `<button class="btn btn-red btn-sm" onclick="deleteProduct(${p.id})">Delete</button>` : ""}
       </div></div>`;
   }).join("") : `<div class="empty">${DATA.products.length ? "No products match your search." : "No products yet. Click “+ Add product”."}</div>`;
 }
@@ -387,6 +491,7 @@ function saveProduct(e){
   toast(editing ? "Product updated — click Publish to put it live." : "Product added — click Publish to put it live.");
 }
 function deleteProduct(id){
+  if(!isAdmin()) return;
   const p = DATA.products.find(x=>x.id===id);
   if(!confirm(`Delete “${p.n}”?`)) return;
   DATA.products.splice(DATA.products.indexOf(p),1); delete photos[id];
@@ -496,6 +601,61 @@ async function publish(){
     toast(err.status===401 ? "Your access key has expired. Sign out and sign in with a new one." :
       err.status===409 ? "Someone else just saved changes. Reload the page and try again." : "Couldn't publish: " + err.message, true);
   }finally{ $("busy").classList.remove("on"); $("busy").textContent = "Publishing…" }
+}
+
+/* ---------- users (admins only) ---------- */
+let ACC = {users:[]}, ACC_SHA = null;
+async function loadUsers(){
+  try{
+    const f = await gh(`/contents/${ACCOUNTS_PATH}?ref=${BRANCH}`, {allow404:true});
+    ACC = f ? JSON.parse(b64ToText(f.content)) : {users:[]}; ACC.users = ACC.users || []; ACC_SHA = f ? f.sha : null;
+  }catch(err){ toast("Couldn't load users: " + err.message, true) }
+  renderUsers();
+}
+function renderUsers(){
+  $("userList").innerHTML = ACC.users.length ? ACC.users.map(r => `<div class="urow">
+      <div><b>${esc(r.u)}</b><span class="tag">${r.role === "admin" ? "Admin" : "Staff"}</span>${r.u === WHO ? '<span class="tag">You</span>' : ""}
+        <div class="meta">Added ${esc(r.added || "")}</div></div>
+      <div class="acts"><button class="btn btn-line btn-sm" onclick="resetPassword('${esc(r.u)}')">Change password</button>
+        <button class="btn btn-red btn-sm" onclick="removeUser('${esc(r.u)}')">Remove</button></div></div>`).join("")
+    : `<div class="empty">No users yet. Add the first one below.</div>`;
+}
+async function saveUsers(change, message){
+  $("busy").textContent = "Saving…"; $("busy").classList.add("on");
+  try{
+    const f = await gh(`/contents/${ACCOUNTS_PATH}?ref=${BRANCH}`, {allow404:true});
+    const latest = f ? JSON.parse(b64ToText(f.content)) : {users:[]}; latest.users = latest.users || [];
+    change(latest);
+    const res = await gh(`/contents/${ACCOUNTS_PATH}`, {method:"PUT", body:JSON.stringify({message, content:textToB64(JSON.stringify(latest,null,1)+"\n"), branch:BRANCH, ...(f?{sha:f.sha}:{})})});
+    ACC = latest; ACC_SHA = res.content.sha; renderUsers(); return true;
+  }catch(err){ toast("Couldn't save: " + err.message, true); return false }
+  finally{ $("busy").classList.remove("on"); $("busy").textContent = "Publishing…" }
+}
+async function addUser(e){
+  e.preventDefault();
+  const u = $("nuName").value.trim().toLowerCase(), role = $("nuRole").value, p1 = $("nuPass").value, p2 = $("nuPass2").value;
+  if(!/^[a-z0-9._-]{3,30}$/.test(u)) return toast("Username: 3–30 lowercase letters, numbers, dot, dash or underscore.", true);
+  if(p1.length < 10) return toast("Password must be at least 10 characters.", true);
+  if(p1 !== p2) return toast("The two passwords don't match.", true);
+  if(ACC.users.some(r => r.u === u)) return toast("That username already exists.", true);
+  $("busy").textContent = "Securing…"; $("busy").classList.add("on");
+  const rec = await sealToken(u, role, p1);
+  const ok = await saveUsers(acc => { if(acc.users.some(r => r.u === u)) throw new Error("that username already exists"); acc.users.push(rec) }, `Admin: add user ${u}`);
+  if(ok){ e.target.reset(); toast(`${u} added — they can sign in in about a minute.`) }
+}
+async function resetPassword(u){
+  const p1 = prompt(`New password for ${u} (at least 10 characters):`); if(p1 === null) return;
+  if(p1.length < 10) return toast("Password must be at least 10 characters.", true);
+  if(prompt("Type the new password again:") !== p1) return toast("The two passwords don't match.", true);
+  const old = ACC.users.find(r => r.u === u); if(!old) return;
+  $("busy").textContent = "Securing…"; $("busy").classList.add("on");
+  const rec = await sealToken(u, old.role, p1);
+  if(await saveUsers(acc => { const i = acc.users.findIndex(r => r.u === u); if(i < 0) throw new Error("user not found"); acc.users[i] = rec }, `Admin: change password for ${u}`))
+    toast(`Password changed for ${u}.`);
+}
+async function removeUser(u){
+  if(!confirm(u === WHO ? "Remove your own account? You'll need the GitHub key or another admin to get back in." : `Remove ${u}? They won't be able to sign in any more.`)) return;
+  if(await saveUsers(acc => { acc.users = acc.users.filter(r => r.u !== u) }, `Admin: remove user ${u}`)) toast(`${u} removed.`);
 }
 </script>
 </body>
