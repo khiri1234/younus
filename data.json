@@ -143,7 +143,7 @@
   {
    "id": 6,
    "c": "Rice",
-   "n": "Gautam Basmati Rice",
+   "n": "Gautam Basmati Rice 1x20kg",
    "an": "أرز بسمتي جواتم",
    "d": "Extra-long aged grain, fluffy biryani",
    "ad": "حبة طويلة جدًا ومعتّقة، مثالي للبرياني",
@@ -392,6 +392,19 @@
    "e": "🫒",
    "bg": "#e4e8cc",
    "img": "images/24.jpg?v=1794240060493"
+  },
+  {
+   "id": 27,
+   "c": "Rice",
+   "n": "India Gate 1x25kg",
+   "an": "ارز بوابة الهند 1*25كغ",
+   "d": "",
+   "ad": "",
+   "u": "25kg",
+   "p": 299,
+   "e": "🛍️",
+   "bg": "#f1e8d4",
+   "img": "images/27.jpg?v=1794246023567"
   }
  ]
 }
