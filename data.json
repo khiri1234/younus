@@ -41,10 +41,6 @@
   {
    "en": "Cleaning Items",
    "ar": "لوازم التنظيف"
-  },
-  {
-   "en": "Saffron",
-   "ar": "زعفران"
   }
  ],
  "products": [
@@ -328,7 +324,7 @@
    "p": 6,
    "e": "🌿",
    "bg": "#d4e6cb",
-   "img": "images/19.jpg?v=1794240970359"
+   "img": "images/19.jpg?v=1794245561426"
   },
   {
    "id": 20,
