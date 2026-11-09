@@ -1,0 +1,13 @@
+{
+ "users": [
+  {
+   "u": "admin",
+   "role": "admin",
+   "iter": 600000,
+   "salt": "p/ifv80DYl8DqQG1pWHNxA==",
+   "iv": "l0LnbCF2TlhB/u77",
+   "ct": "wF0fy4MverEPOIQGMBClSkvsJE9mIIYCKmp8KBMB7g6st4y2ZY6KhunFaDbDMZJfsw0+6kOIL8euSjDpk91Da6n7L7y7D+X4ut90kMyoGnnX3MDCEl5PDCHAycNABRQZc8vy2rik9uKhN84gbg==",
+   "added": "2026-11-09"
+  }
+ ]
+}
