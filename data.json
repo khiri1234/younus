@@ -23,8 +23,8 @@
    "ar": "البقوليات"
   },
   {
-   "en": "Tea & Sugar",
-   "ar": "الشاي والسكر"
+   "en": "Tea",
+   "ar": "الشاي"
   },
   {
    "en": "Herbs",
@@ -33,6 +33,10 @@
   {
    "en": "Oils",
    "ar": "الزيوت"
+  },
+  {
+   "en": "Coffee",
+   "ar": "قهوه"
   }
  ],
  "products": [
@@ -249,7 +253,7 @@
   },
   {
    "id": 15,
-   "c": "Tea & Sugar",
+   "c": "Tea",
    "n": "Lipton Yellow Label Tea",
    "an": "شاي ليبتون العلامة الصفراء",
    "d": "Strong, bold, rich colour",
@@ -263,7 +267,7 @@
   },
   {
    "id": 16,
-   "c": "Tea & Sugar",
+   "c": "Tea",
    "n": "Lipton Green Tea",
    "an": "شاي ليبتون الأخضر",
    "d": "Light and refreshing",
@@ -276,7 +280,7 @@
   },
   {
    "id": 17,
-   "c": "Tea & Sugar",
+   "c": "Tea",
    "n": "White Sugar",
    "an": "سكر أبيض",
    "d": "Fine refined sugar",
@@ -288,7 +292,7 @@
   },
   {
    "id": 18,
-   "c": "Tea & Sugar",
+   "c": "Tea",
    "n": "Brown Sugar",
    "an": "سكر بني",
    "d": "Soft & naturally molasses-rich",
