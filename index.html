@@ -225,6 +225,10 @@ nav a.link:hover:after{width:100%}
 .buy{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .price b{font-size:19px;color:var(--ink)}.price small{display:block;color:var(--muted);font-size:12px;margin-top:-3px}
 .add{background:var(--green);color:#fff;border:0;padding:10px 16px;border-radius:999px;font-weight:600;font-size:13.5px;cursor:pointer;font-family:inherit;transition:.2s}
+.sizes{display:flex;flex-wrap:wrap;gap:6px;margin:-6px 0 14px}
+.sz{border:1.5px solid #e3d9bf;background:#fff;color:var(--green);border-radius:999px;padding:4px 11px;font:600 12.5px 'Inter',sans-serif;cursor:pointer;transition:.15s}
+.sz:hover{border-color:var(--green)}.sz.on{background:var(--green);color:#fff;border-color:var(--green)}
+[dir=rtl] .sz{font-family:'Tajawal','Inter',sans-serif}
 .add:hover{background:var(--gold)}
 .note{margin-top:26px;font-size:13px;color:var(--muted);text-align:center}
 
@@ -536,7 +540,18 @@ const isAr = () => LANG === "ar";
 const tr = (en, ar) => isAr() ? ar : en;
 const pName = p => esc(isAr() && p.an ? p.an : p.n);
 const pDesc = p => esc(isAr() && p.ad ? p.ad : p.d);
-const pUnit = p => esc(isAr() ? String(p.u).replace(/kg$/," كغ").replace(/g$/," غ").replace(/L$/," لتر").replace(/ bags$/," كيس") : p.u);
+const unitTxt = u => isAr() ? String(u).replace(/kg$/," كغ").replace(/g$/," غ").replace(/L$/," لتر").replace(/ bags$/," كيس") : String(u);
+const pUnit = p => esc(unitTxt(p.u));
+/* sizes: a product may list several sizes, each with its own price, in p.v = [{u,p},…] */
+const sizes = p => (Array.isArray(p.v) && p.v.length) ? p.v : [{u:p.u, p:p.p}];
+const SEL = {};                                   // product id -> chosen size index on its card
+const keyOf = (id, u) => id + "|" + u;            // cart key = product + size
+function lookup(key){
+  const [id, ...rest] = String(key).split("|"), u = rest.join("|");
+  const p = P.find(x => x.id == id && !x.hidden); if(!p) return null;
+  const s = sizes(p), v = rest.length ? s.find(z => String(z.u) === u) : s[0];
+  return v ? {p, v} : null;
+}
 const catName = c => esc(isAr() ? (AR_CAT[c]||c) : c);
 const esc = s => String(s==null?"":s).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch]);
 function setLang(l){
@@ -571,27 +586,35 @@ function renderGrid(){
      <div class="thumb" style="background:${esc(x.bg||"#f1e8d4")}">${x.t?`<em>${esc(tr(x.t,AR_TAG[x.t]||x.t))}</em>`:""}<span class="emo">${esc(x.e||"🛍️")}</span>${x.img?`<img class="ph" loading="lazy" src="${esc(x.img)}" alt="${pName(x)}" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()">`:""}</div>
      <div class="card-body">
        <h4>${pName(x)}</h4><p>${pDesc(x)}</p>
-       <div class="buy"><div class="price"><b>${aed(x.p)}</b><small>${tr("per","لكل")} ${pUnit(x)}</small></div>
+       ${sizeChips(x)}
+       <div class="buy"><div class="price"><b>${aed(curSize(x).p)}</b><small>${tr("per","لكل")} ${esc(unitTxt(curSize(x).u))}</small></div>
        <button class="add" onclick="add(${x.id})">${tr("+ Add","+ أضف")}</button></div>
      </div></div>`).join("");
 }
+function curSize(x){ const s = sizes(x); return s[Math.min(SEL[x.id]||0, s.length-1)] }
+function sizeChips(x){
+  const s = sizes(x); if(s.length < 2) return "";
+  const i = Math.min(SEL[x.id]||0, s.length-1);
+  return `<div class="sizes" role="group" aria-label="${tr("Choose size","اختر الحجم")}">${s.map((z,k)=>`<button type="button" class="sz${k===i?" on":""}" aria-pressed="${k===i}" onclick="pick(${x.id},${k})">${esc(unitTxt(z.u))}</button>`).join("")}</div>`;
+}
+function pick(id, k){ SEL[id] = k; renderGrid() }
 function save(){ try{localStorage.setItem("yf_cart",JSON.stringify(cart))}catch(e){} }
-function add(id){ cart[id]=(cart[id]||0)+1; save(); renderCart(); toast(tr("Added to cart ✓","تمت الإضافة إلى السلة ✓")) }
-function chg(id,d){ cart[id]=(cart[id]||0)+d; if(cart[id]<=0) delete cart[id]; save(); renderCart() }
-function rm(id){ delete cart[id]; save(); renderCart() }
+function add(id){ const p = P.find(x=>x.id==id); if(!p) return; const k = keyOf(id, curSize(p).u); cart[k]=(cart[k]||0)+1; save(); renderCart(); toast(tr("Added to cart ✓","تمت الإضافة إلى السلة ✓")) }
+function chg(k,d){ cart[k]=(cart[k]||0)+d; if(cart[k]<=0) delete cart[k]; save(); renderCart() }
+function rm(k){ delete cart[k]; save(); renderCart() }
 function totals(){
-  const sub = Object.entries(cart).reduce((s,[id,q])=>s+P.find(p=>p.id==id).p*q,0);
+  const sub = Object.entries(cart).reduce((s,[k,q])=>{ const L = lookup(k); return s + (L ? L.v.p*q : 0) },0);
   const del = sub===0?0:(sub>=FREE_DELIVERY_MIN?0:DELIVERY_FEE);
   return {sub,del,tot:sub+del};
 }
 function renderCart(){
   const ids = Object.keys(cart);
   $("count").textContent = Object.values(cart).reduce((a,b)=>a+b,0);
-  $("cartBody").innerHTML = ids.length ? ids.map(id=>{const p=P.find(x=>x.id==id),q=cart[id];return `
+  $("cartBody").innerHTML = ids.length ? ids.map(k=>{const L=lookup(k); if(!L) return ""; const {p,v}=L, q=cart[k], dk=esc(k); return `
     <div class="item"><div class="em">${esc(p.e||"🛍️")}</div>
-      <div><b>${pName(p)}</b><small>${pUnit(p)} · ${aed(p.p)}</small>
-        <div class="qty"><button onclick="chg(${id},-1)">−</button><span>${q}</span><button onclick="chg(${id},1)">+</button></div></div>
-      <div style="text-align:end"><b>${aed(p.p*q)}</b><br><button class="rm" onclick="rm(${id})">${tr("Remove","إزالة")}</button></div></div>`}).join("")
+      <div><b>${pName(p)}</b><small>${esc(unitTxt(v.u))} · ${aed(v.p)}</small>
+        <div class="qty"><button data-k="${dk}" onclick="chg(this.dataset.k,-1)">−</button><span>${q}</span><button data-k="${dk}" onclick="chg(this.dataset.k,1)">+</button></div></div>
+      <div style="text-align:end"><b>${aed(v.p*q)}</b><br><button class="rm" data-k="${dk}" onclick="rm(this.dataset.k)">${tr("Remove","إزالة")}</button></div></div>`}).join("")
     : `<div class="empty">🛒<br><br>${tr("Your cart is empty.<br>Add some products from the shop.","سلتك فارغة.<br>أضف بعض المنتجات من المتجر.")}</div>`;
   const t = totals();
   $("sub").textContent = aed(t.sub);
@@ -605,7 +628,7 @@ function wa(text){ window.open(`https://wa.me/${WHATSAPP}?text=${encodeURICompon
 function placeOrder(e){
   e.preventDefault();
   const t = totals();
-  const lines = Object.entries(cart).map(([id,q])=>{const p=P.find(x=>x.id==id);return `• ${pName(p)} (${pUnit(p)}) × ${q} = ${aed(p.p*q)}`}).join("\n");
+  const lines = Object.entries(cart).map(([k,q])=>{const L=lookup(k); if(!L) return null; return `• ${pName(L.p)} (${unitTxt(L.v.u)}) × ${q} = ${aed(L.v.p*q)}`}).filter(Boolean).join("\n");
   if(isAr()){
     wa(`*طلب جديد – يونس للمواد الغذائية*\n\n${lines}\n\nالمجموع الفرعي: ${aed(t.sub)}\nالتوصيل: ${t.del?aed(t.del):"مجاني"}\n*الإجمالي: ${aed(t.tot)}*\n\nالاسم: ${$("cN").value}\nالهاتف: ${$("cP").value}\nالإمارة: ${$("cE").value}\nالعنوان: ${$("cA").value}\nالدفع: نقدًا عند الاستلام`);
     return;
@@ -639,7 +662,10 @@ async function loadData(){
   }catch(e){
     $("grid").innerHTML = `<p class="note">${tr("Products could not be loaded. Please refresh the page.","تعذّر تحميل المنتجات. يرجى تحديث الصفحة.")}</p>`;
   }
-  Object.keys(cart).forEach(id => { if(!P.some(p=>p.id==id && !p.hidden)) delete cart[id] });
+  Object.keys(cart).forEach(k => {                 // drop removed items; move old carts (id only) to id|size keys
+    const L = lookup(k); if(!L){ delete cart[k]; return }
+    if(!String(k).includes("|")){ const nk = keyOf(L.p.id, L.v.u); cart[nk] = (cart[nk]||0) + cart[k]; delete cart[k] }
+  });
   save();
 }
 $("phoneShow").textContent = PHONE_DISPLAY;
