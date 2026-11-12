@@ -414,6 +414,12 @@ footer .cp{padding-top:20px;text-align:center;font-size:13px}
 
   /* hero */
   .hero{padding:44px 0 52px}
+  /* photo window at the top showing the يونس shop sign */
+  .hero.has-photo,[dir=rtl] .hero.has-photo{
+    background:linear-gradient(180deg,rgba(7,20,48,.35) 0,rgba(7,20,48,.05) 70px,rgba(7,20,48,0) 160px,rgba(7,20,48,.25) 250px,#0b1d44 330px),
+               var(--hero-img) 100% 0/230% auto no-repeat,#0b1d44;
+    padding-top:300px}
+  .hero.has-photo:before{mask-image:linear-gradient(to bottom,transparent 0,transparent 300px,#000 380px,transparent 95%)}
   .badge{font-size:12px;padding:6px 12px;margin-bottom:16px}
   .hero h1{font-size:35px;line-height:1.12;margin-bottom:14px}
   .hero p{font-size:15px;margin-bottom:22px;line-height:1.6}
